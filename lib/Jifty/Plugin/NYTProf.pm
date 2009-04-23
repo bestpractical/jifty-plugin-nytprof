@@ -7,6 +7,8 @@ use Template::Declare::Tags;
 
 __PACKAGE__->mk_accessors(qw/profile_request/);
 
+sub prereq_plugins { 'RequestInspector' }
+
 sub _static_root {
     my $self = shift;
     my $dir = Jifty::Util->absolute_path("var/profile");
