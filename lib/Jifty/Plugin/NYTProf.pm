@@ -25,6 +25,13 @@ sub base_root {
     return $dir;
 }
 
+sub profile_dir {
+    my $self = shift;
+    my $id   = shift;
+
+    return File::Spec->catfile($self->base_root, "nytprof-$id");
+}
+
 sub init {
     my $self = shift;
 
@@ -59,34 +66,33 @@ sub inspect_before_request {
 
     my $id = Jifty->web->serial;
 
-    my $dir = File::Spec->catfile( __PACKAGE__->base_root, "nytprof-$id" );
-    warn "==> enabling profile at $dir.out";
+    my $file = $self->profile_dir($id) . ".out";
+    warn "==> enabling profile at $file";
 
-    DB::enable_profile("$dir.out");
+    DB::enable_profile("$file");
 
-    return $dir;
+    return $id;
 }
 
 sub inspect_after_request {
     my $self = shift;
-    my $dir  = shift;
+    my $id   = shift;
 
     return unless $self->profile_request;
 
     DB::finish_profile();
 
-    return $dir;
+    return $id;
 }
 
 sub inspect_render_summary { '-' }
 
 sub inspect_render_analysis {
     my $self = shift;
-    my $dir = shift;
-
-    my ($self_plugin) = Jifty->find_plugin('Jifty::Plugin::NYTProf');
+    my $id   = shift;
 
     # need to generate the profile
+    my $dir = $self->profile_dir($id);
     if (!-d $dir) {
         die "Unable to find profile output file '$dir.out'"
             unless -e "$dir.out";
