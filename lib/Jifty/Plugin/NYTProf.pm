@@ -67,7 +67,6 @@ sub inspect_before_request {
     my $id = Jifty->web->serial;
 
     my $file = $self->profile_dir($id) . ".out";
-    warn "==> enabling profile at $file";
 
     DB::enable_profile("$file");
 
@@ -84,8 +83,6 @@ sub inspect_after_request {
 
     return $id;
 }
-
-sub inspect_render_summary { '-' }
 
 sub inspect_render_analysis {
     my $self = shift;
