@@ -1,9 +1,9 @@
+package Jifty::Plugin::NYTProf;
 use strict;
 use warnings;
-
-package Jifty::Plugin::NYTProf;
-use base qw/Jifty::Plugin/;
+use base 'Jifty::Plugin';
 use File::Path 'mkpath';
+
 __PACKAGE__->mk_accessors(qw/profile_request/);
 
 our @requests;
