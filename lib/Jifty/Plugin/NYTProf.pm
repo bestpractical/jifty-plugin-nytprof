@@ -45,14 +45,6 @@ sub init {
 
     if ($self->profile_request) {
         warn "Only profiling requests; unset NYTPROF environment variable to profile startup\n";
-
-        Jifty::Handler->add_trigger(
-            before_request => sub { $self->before_request(@_) }
-        );
-
-        Jifty::Handler->add_trigger(
-            after_request => sub { $self->after_request(@_) }
-        );
     } else {
         warn "Only profiling startup time -- set NYTPROF=start=no to profile requests\n";
         Jifty->add_trigger(
@@ -61,30 +53,42 @@ sub init {
     }
 }
 
-sub before_request {
+sub inspect_before_request {
     my $self = shift;
 
-    my $file = File::Spec->catfile( __PACKAGE__->base_root, 'nytprof-'.(1+scalar @requests).".out" );
-    warn "==> enabling profile at $file";
-    DB::enable_profile( $file );
+    return unless $self->profile_request;
+
+    my $id = Jifty->web->serial;
+
+    my $file = File::Spec->catfile( __PACKAGE__->base_root, "nytprof-$id" );
+    warn "==> enabling profile at $file.out";
+
+    DB::enable_profile("$file.out");
+
+    return $file;
 }
 
-sub after_request {
+sub inspect_after_request {
     my $self = shift;
-    my $handler = shift;
-    my $cgi = shift;
+    my $file = shift;
+
+    return unless $self->profile_request;
+
     DB::finish_profile();
 
-    push @requests, {
-        id => 1 + @requests,
-        url => $cgi->url(-absolute=>1,-path_info=>1),
-        time => scalar gmtime,
-    };
-    return 1;
+    return $file;
 }
 
-sub clear_profiles {
-    @requests = ();
+sub inspect_render_analysis {
+    my $self = shift;
+    my $file = shift;
+
+    my ($self_plugin) = Jifty->find_plugin('Jifty::Plugin::NYTProf');
+    return if -d "$file";
+    die "Unable to find profile output file '$file.out'" unless -e "$file.out";
+    system("nytprofhtml -f $file.out -o $file");
+
+    return;
 }
 
 1;
