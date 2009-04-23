@@ -6,8 +6,6 @@ use File::Path 'mkpath';
 
 __PACKAGE__->mk_accessors(qw/profile_request/);
 
-our @requests;
-
 sub _static_root {
     my $self = shift;
     my $dir = Jifty::Util->absolute_path("var/profile");
