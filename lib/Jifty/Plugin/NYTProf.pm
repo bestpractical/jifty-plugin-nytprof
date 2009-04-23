@@ -92,11 +92,7 @@ sub inspect_render_analysis {
 
     # need to generate the profile
     my $dir = $self->profile_dir($id);
-    if (!-d $dir) {
-        die "Unable to find profile output file '$dir.out'"
-            unless -e "$dir.out";
-        system("nytprofhtml -f $dir.out -o $dir");
-    }
+    $self->generate_profile($dir);
 
     my $profile = '/_profile/'.Jifty->app_class."-$$/nytprof-$id/index.html" ;
 
@@ -111,6 +107,18 @@ sub inspect_render_analysis {
             };
         };
     };
+}
+
+sub generate_profile {
+    my $self = shift;
+    my $dir  = shift;
+
+    if (!-d $dir) {
+        my $input = "$dir.out";
+        die "Unable to find profile output file '$input'"
+            unless -e $input;
+        system("nytprofhtml -f $input -o $dir");
+    }
 }
 
 1;
