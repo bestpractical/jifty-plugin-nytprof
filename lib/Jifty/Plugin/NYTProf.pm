@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use base 'Jifty::Plugin';
 use File::Path 'mkpath';
+use Template::Declare::Tags;
 
 __PACKAGE__->mk_accessors(qw/profile_request/);
 
@@ -77,6 +78,8 @@ sub inspect_after_request {
     return $dir;
 }
 
+sub inspect_render_summary { '-' }
+
 sub inspect_render_analysis {
     my $self = shift;
     my $dir = shift;
@@ -90,7 +93,19 @@ sub inspect_render_analysis {
         system("nytprofhtml -f $dir.out -o $dir");
     }
 
-    return;
+    my $profile = '/_profile/'.Jifty->app_class."-$$/nytprof-$id/index.html" ;
+
+    div {
+        attr { class is 'lightbox', style is 'background-color: white'; };
+        iframe {
+            attr {
+                class is 'lightbox',
+                src is $profile,
+                width is '100%',
+                height is '400',
+            };
+        };
+    };
 }
 
 1;
