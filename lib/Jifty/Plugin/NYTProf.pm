@@ -5,7 +5,7 @@ use base 'Jifty::Plugin';
 use File::Path 'mkpath';
 use Template::Declare::Tags;
 
-__PACKAGE__->mk_accessors(qw/profile_request/);
+__PACKAGE__->mk_accessors(qw/is_profiling_requests/);
 
 sub prereq_plugins { 'RequestInspector' }
 
@@ -48,10 +48,10 @@ sub init {
 
     my %args = (split /[:=]/, $ENV{NYTPROF} || '');
     if ($args{start} and $args{start} eq "no") {
-        $self->profile_request(1);
+        $self->is_profiling_requests(1);
     }
 
-    if ($self->profile_request) {
+    if ($self->is_profiling_requests) {
         warn "Only profiling requests; unset NYTPROF environment variable to profile startup\n";
     } else {
         warn "Only profiling startup time -- set NYTPROF=start=no to profile requests\n";
@@ -64,7 +64,7 @@ sub init {
 sub inspect_before_request {
     my $self = shift;
 
-    return unless $self->profile_request;
+    return unless $self->is_profiling_requests;
 
     my $id = Jifty->web->serial;
 
@@ -79,7 +79,7 @@ sub inspect_after_request {
     my $self = shift;
     my $id   = shift;
 
-    return unless $self->profile_request;
+    return unless $self->is_profiling_requests;
 
     DB::finish_profile();
 
