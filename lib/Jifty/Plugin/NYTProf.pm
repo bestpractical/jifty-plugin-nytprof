@@ -12,7 +12,7 @@ sub prereq_plugins { 'RequestInspector' }
 sub _static_root {
     my $self = shift;
     my $dir = Jifty::Util->absolute_path("var/profile");
-    mkpath [$dir] unless -d $dir;
+    mkpath $dir unless -d $dir;
     return $dir;
 }
 
@@ -23,7 +23,7 @@ sub static_root {
 
 sub base_root {
     my $dir = File::Spec->catfile(__PACKAGE__->_static_root, '_profile' );
-    mkpath [$dir] unless -d $dir;
+    mkpath $dir unless -d $dir;
     return $dir;
 }
 
