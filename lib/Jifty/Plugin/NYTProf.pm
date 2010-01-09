@@ -2,7 +2,7 @@ package Jifty::Plugin::NYTProf;
 use strict;
 use warnings;
 use base 'Jifty::Plugin';
-use File::Path 'mkpath';
+use File::Path qw/mkpath rmtree/;
 use Template::Declare::Tags;
 
 __PACKAGE__->mk_accessors(qw/is_profiling_requests/);
@@ -112,6 +112,27 @@ sub inspect_render_analysis {
             };
         };
     };
+}
+
+sub inspect_render_aggregate {
+    my $self = shift;
+
+    if (Jifty->web->request->argument('generate')) {
+        rmtree $self->profile_dir("merged");
+        unlink $self->profile_file("merged");
+        my @files = map {$self->profile_file($_)} @_;
+        system("nytprofmerge -o @{[$self->profile_file('merged')]} @files");
+    }
+
+    Jifty->web->link(
+        label => "Generate",
+        onclick => {
+            refresh_self => 1,
+            arguments => {generate => 1},
+        },
+    );
+
+    $self->inspect_render_analysis("merged") if -e $self->profile_file("merged");
 }
 
 sub generate_profile {
