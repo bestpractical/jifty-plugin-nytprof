@@ -87,6 +87,7 @@ sub inspect_after_request {
     return unless $self->is_profiling_requests;
 
     DB::finish_profile();
+    rename($self->profile_file($id).".$$", $self->profile_file($id));
 
     return $id;
 }
