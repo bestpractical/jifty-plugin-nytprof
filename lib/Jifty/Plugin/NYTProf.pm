@@ -22,7 +22,7 @@ sub static_root {
 }
 
 sub base_root {
-    my $dir = File::Spec->catfile(__PACKAGE__->_static_root, '_profile', Jifty->app_class.'-'.$$ );
+    my $dir = File::Spec->catfile(__PACKAGE__->_static_root, '_profile' );
     mkpath [$dir] unless -d $dir;
     return $dir;
 }
@@ -94,7 +94,7 @@ sub inspect_render_analysis {
     my $dir = $self->profile_dir($id);
     $self->generate_profile($dir);
 
-    my $profile = '/_profile/'.Jifty->app_class."-$$/nytprof-$id/index.html" ;
+    my $profile = "/_profile/nytprof-$id/index.html" ;
 
     div {
         attr { class is 'lightbox', style is 'background-color: white'; };
